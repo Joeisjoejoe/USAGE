@@ -25,8 +25,11 @@ class AnnoMIPreProcessed(Dataset):
             self.data.append(d)
             class_counts[d["label"]] += 1
         class_weights = [sum(class_counts) / len(class_counts) / c for c in class_counts]
-        class_weights = F.softmax(torch.tensor(class_weights) / 1.75)
+        class_weights = F.softmax(torch.tensor(class_weights) / 1.75, dim=0)
         self.class_weights = class_weights
+        total_count = sum(class_counts)
+        self.class_counts = class_counts
+        self.class_priors = [c / total_count for c in class_counts]
 
     def __len__(self):
         return len(self.data)

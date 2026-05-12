@@ -33,6 +33,9 @@ class ESConv(Dataset):
                 self.data.append(sample)
                 class_counts[row["Next_Strategy"]] += 1
         self.class_weights = [sum(class_counts) / len(class_counts) / c for c in class_counts]
+        total_count = sum(class_counts)
+        self.class_counts = class_counts
+        self.class_priors = [c / total_count for c in class_counts]
 
     def __len__(self):
         return len(self.data)
@@ -70,9 +73,12 @@ class ESConvPreProcessed(Dataset):
             class_counts[d["label"]] += 1
         class_weights = [sum(class_counts) / len(class_counts) / c for c in class_counts]
         # print(f"class_weights: {class_weights}")
-        class_weights = F.softmax(torch.tensor(class_weights) / 1.75)
+        class_weights = F.softmax(torch.tensor(class_weights) / 1.75, dim=0)
         # print(f"class_weights after softmax: {class_weights}")
         self.class_weights = class_weights
+        total_count = sum(class_counts)
+        self.class_counts = class_counts
+        self.class_priors = [c / total_count for c in class_counts]
 
     def __len__(self):
         return len(self.data)

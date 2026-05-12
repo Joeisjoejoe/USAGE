@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Local editor state
+.vscode/
+.idea/
+
+# Experiment outputs and checkpoints
+*-logs/
+*-checkpoints/
+tmp_logs/
+tmp_ckpts/
+_tmp_logs/
+_tmp_checkpoints/
+tmp-run-config.json
+
+# Model artifacts
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+
+# Runtime/cache files
+.cache/
+.pytest_cache/
+
+# OS files
+.DS_Store
+Thumbs.db
