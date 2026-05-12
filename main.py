@@ -30,23 +30,42 @@ DATASETS = {
 def apply_experiment_preset(args):
     if args.experiment_preset == "none":
         return args
-    if args.experiment_preset not in {"v8_confirm_10000", "v8_historical_7500", "v8_reconstructed"}:
+    if args.experiment_preset not in {
+        "v8_confirm_10000",
+        "v8_historical_7500",
+        "v8_reconstructed",
+        "v8_reconstructed_annomi",
+        "v8_reconstructed_annomi_8gb",
+    }:
         raise ValueError(f"Unsupported experiment_preset: {args.experiment_preset}")
     is_confirm_10000 = args.experiment_preset == "v8_confirm_10000"
     is_reconstructed = args.experiment_preset == "v8_reconstructed"
+    is_annomi = args.experiment_preset in {"v8_reconstructed_annomi", "v8_reconstructed_annomi_8gb"}
+    is_annomi_8gb = args.experiment_preset == "v8_reconstructed_annomi_8gb"
 
     preset_values = {
-        "batch_size": 4,
-        "total_steps": 10000 if is_confirm_10000 else 7500,
-        "total_epochs": 8,
-        "save_steps": 500,
-        "eval_steps": 500,
+        "batch_size": 4 if is_annomi_8gb else 16 if is_annomi else 4,
+        "total_steps": 7200 if is_annomi_8gb else 1800 if is_annomi else 10000 if is_confirm_10000 else 7500,
+        "total_epochs": 10 if is_annomi else 8,
+        "save_steps": 600 if is_annomi_8gb else 150 if is_annomi else 500,
+        "eval_steps": 600 if is_annomi_8gb else 150 if is_annomi else 500,
+        "lr": 4e-6 if is_annomi else args.lr,
         "experiment_name": (
+            "v8-reconstructed-annomi-8gb"
+            if is_annomi_8gb
+            else "v8-reconstructed-annomi"
+            if is_annomi
+            else
             "v8-confirm-10000"
             if is_confirm_10000
             else "v8-reconstructed-label-aware-decoder" if is_reconstructed else "v8-historical-7500"
         ),
         "theory_variant": (
+            "v8-reconstructed-annomi-8gb"
+            if is_annomi_8gb
+            else "v8-reconstructed-annomi"
+            if is_annomi
+            else
             "v8-label-aware-decoder-confirm-10000"
             if is_confirm_10000
             else "v8-reconstructed-structure" if is_reconstructed else "v8-historical-config-7500"
@@ -92,7 +111,14 @@ if __name__ == '__main__':
     parser.add_argument('--load_checkpoint', type=int, default=0)
     parser.add_argument('--eval_run_id', type=str, default='')
     parser.add_argument('--experiment_preset', type=str, default='none',
-                        choices=['none', 'v8_confirm_10000', 'v8_historical_7500', 'v8_reconstructed'])
+                        choices=[
+                            'none',
+                            'v8_confirm_10000',
+                            'v8_historical_7500',
+                            'v8_reconstructed',
+                            'v8_reconstructed_annomi',
+                            'v8_reconstructed_annomi_8gb',
+                        ])
     parser.add_argument('--seed', type=int, default=114514)
     parser.add_argument('--model', type=str, required=True)
     parser.add_argument('--dataset', type=str, required=True)
